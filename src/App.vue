@@ -13,9 +13,6 @@
       <div class="assets-table__body-wrapper">
         <div 
           class="assets-table__body"
-          @mouseenter="onMouseEnter"
-          @mouseleave="onMouseLeave"
-          @scroll="onScroll"
         >
           <div class="assets-table__row"
             v-for="(item, key) in assetsFormated"
@@ -71,19 +68,18 @@ export default {
   methods: {
     getAssets() {
       return axios
-      .get('https://api.coincap.io/v2/assets?limit=15')
-      .then(res => {
-        console.log(res.data.data);
-        const assets = res.data.data;
-        assets.forEach(item => {
-          this.$set(this.assets, item.id, {
-            rank: item.rank,
-            name: item.name,
-            priceUsd: +item.priceUsd,
-            marketCapUsd: +item.marketCapUsd,
-            volumeUsd24Hr: +item.volumeUsd24Hr,
-          });
-        })
+        .get('https://api.coincap.io/v2/assets?limit=15')
+        .then(res => {
+          const assets = res.data.data;
+          assets.forEach(item => {
+            this.$set(this.assets, item.id, {
+              rank: item.rank,
+              name: item.name,
+              priceUsd: +item.priceUsd,
+              marketCapUsd: +item.marketCapUsd,
+              volumeUsd24Hr: +item.volumeUsd24Hr,
+            });
+          })
 
         return assets;
       })
@@ -93,29 +89,17 @@ export default {
         this.assets[key].priceUsd = changes[key];
       }
     },
-    onMouseEnter(e) {
-      this.tableHovered = true;
-      e.target.style.maxHeight = "auto";
-    },
-    onMouseLeave(e) {
-      this.tableHovered = false;
-    },
-    onScroll() {
-      console.log("SCROLL");
-    }
   },
   
   created() {
     this.getAssets()
       .then(assets => {
+        // Формируем список активов ввиде строки
         let assetsList = [];
         assets.forEach(item => assetsList.push(item.id));
         assetsList = assetsList.reduce((sum, current, i, arr) => {
-          if (i === arr.length - 1)
-            return sum + current;
-          return sum + current + ',';
-        })
-        
+          return sum + ',' + current;
+        });
         this.ws = new WebSocket(`wss://ws.coincap.io/prices?assets=${assetsList}`);
         this.ws.onmessage = e => this.updatePrice(JSON.parse(e.data));
       })
@@ -205,11 +189,13 @@ function formatNumber(num) {
       height: $head-height;
       align-items: center;
       padding: 0 20px 0 10px;
+      font-style: italic;
     }
 
     &__row {
-      padding: 40px 20px 40px 10px;
+      padding: 20px 20px 20px 10px;
       border-bottom: 1px solid rgba(0, 0, 0,.05);
+      transition: background-color .1s;
     }
 
     &__cell {
