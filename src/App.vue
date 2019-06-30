@@ -240,6 +240,10 @@ function formatNumber(num) {
   @media (max-width: 575px) {
     .assets-table__body {
       width: 100%;
+
+      &-wrapper {
+        overflow-y: auto;
+      }
     }
 
     .assets-table__cell {
